@@ -6,7 +6,7 @@ from typing import Generator, TYPE_CHECKING
 from serial import Serial
 from serial.tools.list_ports import comports as list_serial_ports
 
-from dygma_palette.auxillary_types import DetectedKeyboard
+from dygma_palette.auxillary_types import DetectedKeyboard, RGBW
 from dygma_palette.constants import CHARSET, HARDWARE_IDENTIFIERS, BAUDRATE
 
 
@@ -66,4 +66,14 @@ def palette_backup_restore(dygma_keyboards: tuple[DygmaKeyboard, ...]) -> Genera
     finally:
         for dygma_keyboard in dygma_keyboards:
             dygma_keyboard.palette = original_palette[dygma_keyboard.serial_number]
+
+
+def rgb2rgbw(color: RGBW) -> RGBW:
+    w = min(color.r, color.g, color.b)
+    return RGBW(r=color.r - w, g=color.g - w, b=color.b - w, w=color.w + w)
+
+
+def rgbw2rgb(color: RGBW) -> RGBW:
+    w = color.w
+    return RGBW(r=color.r + w, g=color.g + w, b=color.b + w, w=0)
 

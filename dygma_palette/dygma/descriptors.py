@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from dygma_palette.auxillary_types import Palette, RGBW, VersionType 
 from dygma_palette.constants import PALETTE_SIZE
-from dygma_palette.dygma.utils import neuron_io
+from dygma_palette.dygma.utils import neuron_io, rgb2rgbw
 
 
 if TYPE_CHECKING:
@@ -96,6 +96,10 @@ class PaletteDescriptor(DygmaRaiseBaseDescriptor):
         if len(palette) != PALETTE_SIZE:
             raise ValueError(f"len(palette) != {PALETTE_SIZE}")
 
+        if dygma_keyboard.rgbw_mode:
+            palette = Palette(rgb2rgbw(color) for color in palette)
+            print(f"new RGBW {palette=}")
+
         color_components = " ".join(
             str(n)
             for n in chain.from_iterable(
@@ -114,6 +118,4 @@ class SettingsVersionDescriptor(DygmaRaiseBaseDescriptor):
         request = self.command
         reply = self._neuron_io(dygma_keyboard.device, request)
         return int(reply[0])
-
-
 

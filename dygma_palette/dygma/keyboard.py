@@ -28,6 +28,10 @@ class DygmaKeyboard:
     def color_components_size(self) -> int:
         return 4 if self.keyboard.hardware_identifier.rgbw_mode else 3
 
+    @property
+    def rgbw_mode(self) -> bool:
+        return self.keyboard.hardware_identifier.rgbw_mode 
+
     firmware_version = FirmwareVersionDescriptor()
     hardware_identifier = HardwareIdentifierDescriptor()
     hardware_version = HardwareVersionDescriptor()
