@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from itertools import count
+from math import sqrt
 from typing import Generator
 
 import cv2
@@ -65,9 +66,53 @@ def acquire_image(acquistion_source: AcquisitionSource,
         active_source.release()
 
 
-def extract_palette(image: MatLike, palette_size: int) -> Palette:
+def calculate_color_for_label(rgb: tuple[int, int, int]) -> tuple[int, int, int]:
+    # http://alienryderflex.com/hsp.html
+    brightness = sqrt(.299 * rgb[0] ** 2
+                    + .587 * rgb[1] ** 2
+                    + .114 * rgb[2] ** 2)
+    if brightness > 127:
+        return (0, 0, 0)
+    else:
+        return (255, 255, 255)
+    
+
+def show_palette(centers: MatLike,
+                 caption: str = "Palette",
+                 bar_width: int = 150,
+                 bar_height: int = 150) -> None:
+    bars = []
+    rgb_values = []
+    for bgr in centers:
+        bar = np.zeros((bar_height, bar_width, 3), np.uint8)
+        bar[:] = bgr
+        rgb_values.append((int(bgr[2]), int(bgr[1]), int(bgr[0])))
+        bars.append(bar)
+
+    image = np.hstack(bars)
+    for index, rgb in enumerate(rgb_values):
+        image = cv2.putText(
+            img=image,
+            text=f"{index + 1}: #{rgb[0]:2X}{rgb[1]:2X}{rgb[2]:2X}",
+            org=(5 + bar_width * index, bar_height - 10),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.5,
+            color=calculate_color_for_label(rgb),
+            thickness=1,
+            lineType=cv2.LINE_AA,
+            bottomLeftOrigin=False)
+    cv2.imshow(caption, image)
+
+
+def extract_palette(image: MatLike,
+                    palette_size: int,
+                    image_window_name: str = "",
+                    palette_window_name: str = "") -> Palette:
     # https://www.alanzucconi.com/2015/05/24/how-to-find-the-main-colours-in-an-image/
     # https://www.youtube.com/watch?v=90s4SomOSa0
+
+    if image_window_name:
+       cv2.imshow(image_window_name, image) 
 
     height, width, color_depth = image.shape
 
@@ -86,6 +131,9 @@ def extract_palette(image: MatLike, palette_size: int) -> Palette:
         criteria=termination_criteria,
         attempts=attempts,
         flags=flags)  # pyright: ignore [reportArgumentType, reportCallIssue]
+
+    if palette_window_name:
+        show_palette(centers, caption=palette_window_name)
 
     # opencv color components order is BGR not RGB
     return Palette(

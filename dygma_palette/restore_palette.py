@@ -21,20 +21,20 @@ def restore_palette_using_stdout_backup() -> None:
     backup = literal_eval(simplified_text)
 
     detected_keyboards = {
-        (keyboard := DygmaKeyboard(configuration)).serial_number: keyboard
+        (keyboard := DygmaKeyboard(configuration)).neuron_identifier: keyboard
         for configuration in detect_dygma_keyboards() 
     } 
 
-    for serial_number, palette in backup.items():
+    for neuron_identifier, palette in backup.items():
         try:
-            keyboard = detected_keyboards[serial_number]
+            keyboard = detected_keyboards[neuron_identifier]
         except KeyError:
             print(
-                f"Keyboard with S/N {serial_number} not found, skipping!",
+                f"Keyboard with {neuron_identifier=} not found, skipping!",
                 file=stderr)
         else:
             keyboard.palette = Palette(RGBW._make(color) for color in palette)
-            print(f"Restored palette in keyboard {serial_number}.")
+            print(f"Restored palette in keyboard with {neuron_identifier=}.")
 
 
 if __name__ == "__main__":

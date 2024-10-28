@@ -1,4 +1,8 @@
+#!/bin/env python3
+
 from sys import stderr
+
+import cv2
 
 from dygma_palette.constants import PALETTE_SIZE
 from dygma_palette.dygma.keyboard import DygmaKeyboard
@@ -26,13 +30,27 @@ def main() -> None:
     with palette_backup_restore(dygma_keyboards):
         with acquire_image(acquisition_device) as image_generator:
             try:
-                for image in image_generator:
-                    palette = extract_palette(image, palette_size=PALETTE_SIZE)
+                for image_number, image in enumerate(image_generator):
+                    image_window_name = f"Image {image_number}"
+                    palette_window_name = f"Palette {image_number}"
+                    palette = extract_palette(
+                        image=image,
+                        palette_size=PALETTE_SIZE,
+                        image_window_name=image_window_name,
+                        palette_window_name=palette_window_name)
                     print(f"new {palette=}")
                     for dygma_keyboard in dygma_keyboards:
                         dygma_keyboard.palette = palette
+
+                    key = cv2.waitKey(0)
+                    cv2.destroyWindow(image_window_name)
+                    cv2.destroyWindow(palette_window_name)
+                    if (key & 0xFF) == ord("q"):
+                        break
             except KeyboardInterrupt:
                 print("restoring default palette")
+            finally:
+                cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

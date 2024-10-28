@@ -57,7 +57,7 @@ def neuron_io(device: str, request: str) -> Generator[str, None, None]:
 @contextmanager
 def palette_backup_restore(dygma_keyboards: tuple[DygmaKeyboard, ...]) -> Generator[None, None, None]:
     original_palette = {
-        dygma_keyboard.serial_number: dygma_keyboard.palette
+        dygma_keyboard.neuron_identifier: dygma_keyboard.palette
         for dygma_keyboard in dygma_keyboards
     }
     print(original_palette)
@@ -65,7 +65,7 @@ def palette_backup_restore(dygma_keyboards: tuple[DygmaKeyboard, ...]) -> Genera
         yield
     finally:
         for dygma_keyboard in dygma_keyboards:
-            dygma_keyboard.palette = original_palette[dygma_keyboard.serial_number]
+            dygma_keyboard.palette = original_palette[dygma_keyboard.neuron_identifier]
 
 
 def rgb2rgbw(color: RGBW) -> RGBW:

@@ -30,6 +30,17 @@ class DygmaRaiseBaseDescriptor(metaclass=ABCMeta):
         raise NotImplementedError
 
 
+class NeuronIdentifierDescriptor(DygmaRaiseBaseDescriptor):
+    @property
+    def command(self) -> str:
+        return "hardware.chip_id"
+
+    def __get__(self, dygma_keyboard: DygmaKeyboard, objtype=None) -> str:
+        request = self.command
+        reply = self._neuron_io(dygma_keyboard.device, request)
+        return reply[0]
+
+
 class FirmwareVersionDescriptor(DygmaRaiseBaseDescriptor):
     @property
     def command(self) -> str:

@@ -5,8 +5,8 @@ from serial.tools.list_ports import comports as list_serial_ports
 
 from dygma_palette.dygma.descriptors import (
     FirmwareVersionDescriptor, HardwareIdentifierDescriptor,
-    HardwareVersionDescriptor,
-    KeyboardLayoutDescriptor, PaletteDescriptor, SettingsVersionDescriptor)
+    HardwareVersionDescriptor, KeyboardLayoutDescriptor,
+    NeuronIdentifierDescriptor, PaletteDescriptor, SettingsVersionDescriptor)
 
 if TYPE_CHECKING:
     from dygma_palette.dygma.utils import DetectedKeyboard
@@ -36,6 +36,7 @@ class DygmaKeyboard:
     hardware_identifier = HardwareIdentifierDescriptor()
     hardware_version = HardwareVersionDescriptor()
     keyboard_layout = KeyboardLayoutDescriptor()
+    neuron_identifier = NeuronIdentifierDescriptor()
     palette = PaletteDescriptor()
     settings_version = SettingsVersionDescriptor()
 
