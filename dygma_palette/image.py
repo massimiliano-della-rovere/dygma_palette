@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from itertools import count
 from math import sqrt
-from typing import Generator
+from typing import Callable, Generator
 
 import cv2
 import numpy as np
@@ -66,12 +66,16 @@ def acquire_image(acquistion_source: AcquisitionSource,
         active_source.release()
 
 
-def calculate_color_for_label(rgb: tuple[int, int, int]) -> tuple[int, int, int]:
+def calculate_perceived_brightness(bgr: MatLike) -> int:
     # http://alienryderflex.com/hsp.html
-    brightness = sqrt(.299 * rgb[0] ** 2
-                    + .587 * rgb[1] ** 2
-                    + .114 * rgb[2] ** 2)
-    if brightness > 127:
+    return round(
+        sqrt(.299 * bgr[2] ** 2
+           + .587 * bgr[1] ** 2
+           + .114 * bgr[0] ** 2))
+
+
+def calculate_color_for_label(bgr: MatLike) -> tuple[int, int, int]:
+    if calculate_perceived_brightness(bgr) > 127.0:
         return (0, 0, 0)
     else:
         return (255, 255, 255)
@@ -107,7 +111,8 @@ def show_palette(centers: MatLike,
 def extract_palette(image: MatLike,
                     palette_size: int,
                     image_window_name: str = "",
-                    palette_window_name: str = "") -> Palette:
+                    palette_window_name: str = "",
+                    color_key_function: Callable[[MatLike], int] | None = calculate_perceived_brightness) -> Palette:
     # https://www.alanzucconi.com/2015/05/24/how-to-find-the-main-colours-in-an-image/
     # https://www.youtube.com/watch?v=90s4SomOSa0
 
@@ -132,6 +137,9 @@ def extract_palette(image: MatLike,
         attempts=attempts,
         flags=flags)  # pyright: ignore [reportArgumentType, reportCallIssue]
 
+    if callable(color_key_function):
+        np.apply_along_axis(color_key_function, axis=1, arr=centers).argsort()
+
     if palette_window_name:
         show_palette(centers, caption=palette_window_name)
 
@@ -139,4 +147,3 @@ def extract_palette(image: MatLike,
     return Palette(
         RGBW(r, g, b)
         for b, g, r in np.uint8(centers).tolist())  # pyright: ignore [reportGeneralTypeIssues]
-
