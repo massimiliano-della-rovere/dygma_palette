@@ -1,4 +1,3 @@
-from math import sqrt
 from typing import Callable
 
 import cv2
@@ -9,26 +8,13 @@ from cv2.typing import MatLike
 from dygma_palette.auxillary_types import FrameGenerator, Palette, RGBW
 from dygma_palette.constants import PALETTE_SIZE
 from dygma_palette.dygma.keyboard import DygmaKeyboard
-from dygma_palette.image import extract_centroids
+from dygma_palette.image import (
+    calculate_color_for_label, calculate_perceived_brightness,
+    centroids_to_palette, extract_centroids)
 
 
 def wait_for_key(timeout: int) -> int:
     return cv2.waitKey(timeout)
-
-
-def calculate_perceived_brightness(bgr: MatLike) -> int:
-    # http://alienryderflex.com/hsp.html
-    return round(
-        sqrt(.299 * bgr[2] ** 2
-           + .587 * bgr[1] ** 2
-           + .114 * bgr[0] ** 2))
-
-
-def calculate_color_for_label(bgr: MatLike) -> tuple[int, int, int]:
-    if calculate_perceived_brightness(bgr) > 127.0:
-        return (0, 0, 0)
-    else:
-        return (255, 255, 255)
 
 
 def show_image(image: MatLike, window_name: str = "Image") -> None:
@@ -81,10 +67,7 @@ def process_centroids(centroids: MatLike,
         show_centroids(centroids, window_name=window_name)
 
     # opencv color components order is BGR not RGB
-    return Palette(
-        RGBW(r, g, b)
-        for b, g, r in np.uint8(centroids).tolist())  # pyright: ignore [reportGeneralTypeIssues]
-
+    return centroids_to_palette(centroids)
 
 def run(dygma_keyboards: tuple[DygmaKeyboard, ...],
         image_generator: FrameGenerator) -> None:

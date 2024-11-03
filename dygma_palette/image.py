@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from itertools import count
+from math import sqrt
 from typing import Generator
 
 import cv2
@@ -7,7 +8,8 @@ import numpy as np
 from cv2.typing import MatLike
 
 
-from dygma_palette.auxillary_types import AcquisitionSource, FrameGenerator
+from dygma_palette.auxillary_types import (
+    AcquisitionSource, FrameGenerator, Palette, Palette, RGBW)
 
 
 def list_acquisition_sources() -> Generator[AcquisitionSource, None, None]:
@@ -88,4 +90,25 @@ def extract_centroids(image: MatLike, palette_size: int) -> MatLike:
         flags=flags)  # pyright: ignore [reportArgumentType, reportCallIssue]
 
     return centroids
+
+
+def calculate_perceived_brightness(bgr_centroid: MatLike) -> int:
+    # http://alienryderflex.com/hsp.html
+    return round(
+        sqrt(.299 * bgr_centroid[2] ** 2
+           + .587 * bgr_centroid[1] ** 2
+           + .114 * bgr_centroid[0] ** 2))
+
+
+def calculate_color_for_label(bgr: MatLike) -> tuple[int, int, int]:
+    if calculate_perceived_brightness(bgr) > 127.0:
+        return (0, 0, 0)
+    else:
+        return (255, 255, 255)
+
+
+def centroids_to_palette(centroids: MatLike) -> Palette:
+    return Palette(
+        RGBW(r, g, b)
+        for b, g, r in np.uint8(centroids).tolist())  # pyright: ignore [reportGeneralTypeIssues]
 
