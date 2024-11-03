@@ -2,14 +2,10 @@
 
 from sys import stderr
 
-from dygma_palette.constants import PALETTE_SIZE
 from dygma_palette.dygma.keyboard import DygmaKeyboard
 from dygma_palette.dygma.utils import detect_dygma_keyboards, palette_backup_restore
-from dygma_palette.image import (
-    acquire_image, extract_centroids, list_acquisition_sources)
-from dygma_palette.frontend.desktop import (
-    close_window, close_all_windows, process_centroids, show_centroids,
-    show_image, wait_for_key)
+from dygma_palette.image import acquire_image, list_acquisition_sources
+from dygma_palette.frontend.desktop import run
 
 
 def main() -> None:
@@ -31,30 +27,7 @@ def main() -> None:
 
     with palette_backup_restore(dygma_keyboards):
         with acquire_image(acquisition_device) as image_generator:
-            try:
-                for image_number, image in enumerate(image_generator):
-                    image_window_name = f"Image {image_number}"
-                    palette_window_name = f"Palette {image_number}"
-                    centroids = extract_centroids(
-                        image=image,
-                        palette_size=PALETTE_SIZE)
-                    show_image(image, window_name=image_window_name)
-                    show_centroids(centroids, window_name=palette_window_name)
-
-                    palette = process_centroids(centroids)
-                    print(f"new {palette=}")
-                    for dygma_keyboard in dygma_keyboards:
-                        dygma_keyboard.palette = palette
-
-                    key = wait_for_key(timeout=0)
-                    close_window(image_window_name)
-                    close_window(palette_window_name)
-                    if (key & 0xFF) == ord("q"):
-                        break
-            except KeyboardInterrupt:
-                print("restoring default palette")
-            finally:
-                close_all_windows()
+            run(dygma_keyboards, image_generator)
 
 
 if __name__ == "__main__":

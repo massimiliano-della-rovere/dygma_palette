@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from math import sqrt
 from typing import Callable
 
@@ -7,7 +6,10 @@ import numpy as np
 from cv2.typing import MatLike
 
 
-from dygma_palette.auxillary_types import Palette, RGBW
+from dygma_palette.auxillary_types import FrameGenerator, Palette, RGBW
+from dygma_palette.constants import PALETTE_SIZE
+from dygma_palette.dygma.keyboard import DygmaKeyboard
+from dygma_palette.image import extract_centroids
 
 
 def wait_for_key(timeout: int) -> int:
@@ -76,10 +78,38 @@ def process_centroids(centroids: MatLike,
         np.apply_along_axis(color_key_function, axis=1, arr=centroids).argsort()
 
     if window_name:
-        show_palette(centroids, window_name=window_name)
+        show_centroids(centroids, window_name=window_name)
 
     # opencv color components order is BGR not RGB
     return Palette(
         RGBW(r, g, b)
         for b, g, r in np.uint8(centroids).tolist())  # pyright: ignore [reportGeneralTypeIssues]
+
+
+def run(dygma_keyboards: tuple[DygmaKeyboard, ...],
+        image_generator: FrameGenerator) -> None:
+    try:
+        for image_number, image in enumerate(image_generator):
+            image_window_name = f"Image {image_number}"
+            palette_window_name = f"Palette {image_number}"
+            centroids = extract_centroids(
+                image=image,
+                palette_size=PALETTE_SIZE)
+            show_image(image, window_name=image_window_name)
+            show_centroids(centroids, window_name=palette_window_name)
+
+            palette = process_centroids(centroids)
+            print(f"new {palette=}")
+            for dygma_keyboard in dygma_keyboards:
+                dygma_keyboard.palette = palette
+
+            key = wait_for_key(timeout=0)
+            close_window(image_window_name)
+            close_window(palette_window_name)
+            if (key & 0xFF) == ord("q"):
+                break
+    except KeyboardInterrupt:
+        print("restoring default palette")
+    finally:
+        close_all_windows()
 
