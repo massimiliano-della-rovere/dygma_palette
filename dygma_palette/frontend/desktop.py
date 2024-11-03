@@ -10,7 +10,7 @@ from cv2.typing import MatLike
 from dygma_palette.auxillary_types import Palette, RGBW
 
 
-def ask_user(timeout: int) -> int:
+def wait_for_key(timeout: int) -> int:
     return cv2.waitKey(timeout)
 
 

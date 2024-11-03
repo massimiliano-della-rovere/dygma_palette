@@ -2,8 +2,6 @@
 
 from sys import stderr
 
-import cv2
-
 from dygma_palette.constants import PALETTE_SIZE
 from dygma_palette.dygma.keyboard import DygmaKeyboard
 from dygma_palette.dygma.utils import detect_dygma_keyboards, palette_backup_restore
@@ -11,7 +9,7 @@ from dygma_palette.image import (
     acquire_image, extract_centroids, list_acquisition_sources)
 from dygma_palette.frontend.desktop import (
     close_window, close_all_windows, process_centroids, show_centroids,
-    show_image)
+    show_image, wait_for_key)
 
 
 def main() -> None:
@@ -47,7 +45,7 @@ def main() -> None:
                     for dygma_keyboard in dygma_keyboards:
                         dygma_keyboard.palette = palette
 
-                    key = cv2.waitKey(0)
+                    key = wait_for_key(timeout=0)
                     close_window(image_window_name)
                     close_window(palette_window_name)
                     if (key & 0xFF) == ord("q"):
