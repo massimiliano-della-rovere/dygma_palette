@@ -40,6 +40,7 @@ def main() -> None:
                         palette_size=PALETTE_SIZE)
                     show_image(image, window_name=image_window_name)
                     show_centroids(centroids, window_name=palette_window_name)
+
                     palette = process_centroids(centroids)
                     print(f"new {palette=}")
                     for dygma_keyboard in dygma_keyboards:
