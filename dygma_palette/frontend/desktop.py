@@ -5,7 +5,7 @@ import numpy as np
 from cv2.typing import MatLike
 
 
-from dygma_palette.auxillary_types import FrameGenerator, Palette, RGBW
+from dygma_palette.auxillary_types import FrameGenerator, Palette
 from dygma_palette.constants import PALETTE_SIZE
 from dygma_palette.dygma.keyboard import DygmaKeyboard
 from dygma_palette.image import (
