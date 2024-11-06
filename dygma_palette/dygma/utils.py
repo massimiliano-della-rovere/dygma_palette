@@ -39,7 +39,7 @@ def detect_dygma_keyboards() -> Generator[DetectedKeyboard, None, None]:
                     # ugly solution to avoid circular import
                     from dygma_palette.dygma.keyboard import DygmaKeyboard
                     model = DygmaKeyboard(keyboard_params).keyboard_layout
-                    if 1 != len({model, serial_port.product, hardware_identifier.product}):
+                    if serial_port.product.lower() != serial_port.product.lower():  # pyright: ignore [reportOptionalMemberAccess]
                         continue
 
                 yield keyboard_params
