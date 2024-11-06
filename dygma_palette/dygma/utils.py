@@ -36,10 +36,7 @@ def detect_dygma_keyboards() -> Generator[DetectedKeyboard, None, None]:
                     bootloader_mode_detected=bootloader_mode_detected)
 
                 if hardware_identifier.product.startswith("Raise"):
-                    # ugly solution to avoid circular import
-                    from dygma_palette.dygma.keyboard import DygmaKeyboard
-                    model = DygmaKeyboard(keyboard_params).keyboard_layout
-                    if serial_port.product.lower() != serial_port.product.lower():  # pyright: ignore [reportOptionalMemberAccess]
+                    if serial_port.product.lower() != hardware_identifier.product.lower():  # pyright: ignore [reportOptionalMemberAccess]
                         continue
 
                 yield keyboard_params
