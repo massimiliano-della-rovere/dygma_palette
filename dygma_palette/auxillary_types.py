@@ -52,9 +52,9 @@ class RGBW(NamedTuple):
 
     def __str__(self) -> str:
         if self.w is None:
-            return f"#{hex(self.r)}{hex(self.g)}{hex(self.b)}"
+            return f"#{self.r:02X}{self.g:02X}{self.b:02X}"
         else:
-            return f"#{hex(self.r)}{hex(self.g)}{hex(self.b)}{hex(self.w)}"
+            return f"#{self.r:02X}{self.g:02X}{self.b:02X}{self.w:02X}"
 
 
 Palette = tuple[RGBW, RGBW, RGBW, RGBW, RGBW, RGBW, RGBW, RGBW,
